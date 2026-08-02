@@ -14,6 +14,7 @@
 #' @author Ivan Jacob Agaloos Pesigan
 #'
 #' @param object Output of the [fitVARMxID::FitVARMxID()] function.
+#' @param drop Optional vector of unique IDs to drop.
 #' @param effects Logical.
 #'   If `effects = TRUE`,
 #'   include estimates of the dynamic effects matrix, if available.
@@ -55,6 +56,7 @@
 #' @inherit Meta return references
 #'
 #' @examples
+#' \donttest{
 #' if (requireNamespace("simStateSpace")) {
 #'   # Generate data using the simStateSpace package-------------------------
 #'   library(simStateSpace)
@@ -116,6 +118,7 @@
 #'   confint(stage2)
 #'   extract(stage2, what = "alpha")
 #' }
+#' }
 #'
 #' @family Meta-Analysis of VAR Functions
 #' @keywords metaDyn meta
@@ -123,7 +126,9 @@
 MetaVARMx <- function(object,
                       x = NULL,
                       z = NULL,
+                      drop = NULL,
                       random = TRUE,
+                      fixed_x = TRUE,
                       alpha_free = NULL,
                       alpha_values = NULL,
                       alpha_lbound = NULL,
@@ -137,7 +142,18 @@ MetaVARMx <- function(object,
                       tau_sqr_l_values = NULL,
                       tau_sqr_l_lbound = NULL,
                       tau_sqr_l_ubound = NULL,
-                      i_sqr_univariate = FALSE,
+                      mu_x_free = NULL,
+                      mu_x_values = NULL,
+                      mu_x_lbound = NULL,
+                      mu_x_ubound = NULL,
+                      sigma_x_d_free = NULL,
+                      sigma_x_d_values = NULL,
+                      sigma_x_d_lbound = NULL,
+                      sigma_x_d_ubound = NULL,
+                      sigma_x_l_free = NULL,
+                      sigma_x_l_values = NULL,
+                      sigma_x_l_lbound = NULL,
+                      sigma_x_l_ubound = NULL,
                       gamma_free = NULL,
                       gamma_values = NULL,
                       gamma_lbound = NULL,
@@ -185,6 +201,10 @@ MetaVARMx <- function(object,
       "varmxid"
     )
   )
+  object <- .DropID(
+    object = object,
+    drop = drop
+  )
   y <- fitVARMxID:::coef.varmxid(
     object = object,
     mu = set_point,
@@ -216,6 +236,7 @@ MetaVARMx <- function(object,
       object$converged
     ],
     random = random,
+    fixed_x = fixed_x,
     alpha_free = alpha_free,
     alpha_values = alpha_values,
     alpha_lbound = alpha_lbound,
@@ -229,7 +250,18 @@ MetaVARMx <- function(object,
     tau_sqr_l_values = tau_sqr_l_values,
     tau_sqr_l_lbound = tau_sqr_l_lbound,
     tau_sqr_l_ubound = tau_sqr_l_ubound,
-    i_sqr_univariate = i_sqr_univariate,
+    mu_x_free = mu_x_free,
+    mu_x_values = mu_x_values,
+    mu_x_lbound = mu_x_lbound,
+    mu_x_ubound = mu_x_ubound,
+    sigma_x_d_free = sigma_x_d_free,
+    sigma_x_d_values = sigma_x_d_values,
+    sigma_x_d_lbound = sigma_x_d_lbound,
+    sigma_x_d_ubound = sigma_x_d_ubound,
+    sigma_x_l_free = sigma_x_l_free,
+    sigma_x_l_values = sigma_x_l_values,
+    sigma_x_l_lbound = sigma_x_l_lbound,
+    sigma_x_l_ubound = sigma_x_l_ubound,
     gamma_free = gamma_free,
     gamma_values = gamma_values,
     gamma_lbound = gamma_lbound,

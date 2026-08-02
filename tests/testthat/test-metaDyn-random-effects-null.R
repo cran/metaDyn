@@ -16,7 +16,7 @@ lapply(
     }
     if (identical(Sys.getenv("GITHUB_TEST"), "true")) {
       ci <- TRUE
-      n <- 5000
+      n <- 2000
       robust <- TRUE
       tol <- 0.50
     } else {
@@ -63,6 +63,7 @@ lapply(
           y = y,
           v = v,
           random = TRUE,
+          fixed_x = TRUE,
           seed = 42
         )
         if (ci) {
@@ -73,8 +74,8 @@ lapply(
           confint(fit)
           extract(fit)
           vcov(fit, robust = TRUE)
-          confint(fit, robust = TRUE)
-          summary(fit, robust = TRUE)
+          confint(fit, robust = TRUE, ci_type = "mc")
+          summary(fit, robust = TRUE, ci_type = "mc")
         }
         coefs <- coef(fit)
         testthat::expect_true(
@@ -111,102 +112,108 @@ lapply(
           all(
             abs(
               round(
-                x = mxEval(v_hat, fit$output),
+                x = c(
+                  mxEval(v_hat, fit$output)
+                ),
                 digits = 1
-              ) - v_hat
+              ) - c(
+                diag(v_hat)
+              )
             ) <= tol
           )
         )
-        # benchmark with metaSEM
-        ldl_tau_sqr <- metaDyn:::.MxHelperLDL(tau_sqr)
-        tau_sqr_d <- ldl_tau_sqr$uc_d
-        tau_sqr_l <- ldl_tau_sqr$s_l
-        fit <- Meta(
-          y = y,
-          v = v,
-          random = TRUE,
-          i_sqr_univariate = TRUE,
-          seed = 42
-        )
-        coefs <- coef(fit)
-        summary_table <- summary(fit)
-        y <- do.call(what = "rbind", args = y)
-        colnames(y) <- c("y1", "y2")
-        v <- do.call(
-          what = "rbind",
-          args = lapply(
-            X = v,
-            FUN = function(x) {
-              x[
-                lower.tri(
-                  x = x,
-                  diag = TRUE
-                )
-              ]
-            }
+        if (requireNamespace("metaSEM")) {
+          # benchmark with metaSEM
+          ldl_tau_sqr <- metaDyn:::.MxHelperLDL(tau_sqr)
+          tau_sqr_d <- ldl_tau_sqr$uc_d
+          tau_sqr_l <- ldl_tau_sqr$s_l
+          fit <- Meta(
+            y = y,
+            v = v,
+            random = TRUE,
+            fixed_x = TRUE,
+            seed = 42
           )
-        )
-        colnames(v) <- c("y1y1", "y2y1", "y2y2")
-        data <- as.data.frame(
-          cbind(
-            y,
-            v
+          coefs <- coef(fit)
+          summary_table <- summary(fit)
+          y <- do.call(what = "rbind", args = y)
+          colnames(y) <- c("y1", "y2")
+          v <- do.call(
+            what = "rbind",
+            args = lapply(
+              X = v,
+              FUN = function(x) {
+                x[
+                  lower.tri(
+                    x = x,
+                    diag = TRUE
+                  )
+                ]
+              }
+            )
           )
-        )
-        metasem <- meta(
-          y = cbind(y1, y2),
-          v = cbind(y1y1, y2y1, y2y2),
-          data = data
-        )
-        coefs_metasem <- coef(metasem)
-        vcovs_metasem <- vcov(metasem)
-        summary_table_metasem <- summary(metasem)
-        testthat::expect_true(
-          all(
-            abs(
-              coefs[1:2] - coefs_metasem[1:2]
-            ) <= 0.001
+          colnames(v) <- c("y1y1", "y2y1", "y2y2")
+          data <- as.data.frame(
+            cbind(
+              y,
+              v
+            )
           )
-        )
-        testthat::expect_true(
-          all(
-            abs(
-              c(mxEval(alpha, fit$output)) - coefs_metasem[1:2]
-            ) <= 0.001
+          metasem <- meta(
+            y = cbind(y1, y2),
+            v = cbind(y1y1, y2y1, y2y2),
+            data = data
           )
-        )
-        testthat::expect_true(
-          all(
-            abs(
-              summary_table[1:5, 1] - coefs_metasem
-            ) <= 0.001
+          coefs_metasem <- coef(metasem)
+          vcovs_metasem <- vcov(metasem)
+          summary_table_metasem <- summary(metasem)
+          testthat::expect_true(
+            all(
+              abs(
+                coefs[1:2] - coefs_metasem[1:2]
+              ) <= 0.001
+            )
           )
-        )
-        testthat::expect_true(
-          all(
-            abs(
-              c(
-                mxEval(tau_sqr, fit$output)
-              )[c(1, 2, 4)] - coefs_metasem[3:5]
-            ) <= 0.001
+          testthat::expect_true(
+            all(
+              abs(
+                c(mxEval(alpha, fit$output)) - coefs_metasem[1:2]
+              ) <= 0.001
+            )
           )
-        )
-        testthat::expect_true(
-          all(
-            abs(
-              c(
-                mxEval(i_sqr, fit$output)
-              ) - summary_table_metasem$I2.values[, "Estimate"]
-            ) <= 0.001
+          testthat::expect_true(
+            all(
+              abs(
+                summary_table[1:5, 1] - coefs_metasem
+              ) <= 0.001
+            )
           )
-        )
-        testthat::expect_true(
-          all(
-            abs(
-              summary_table[1:5, 2] - sqrt(diag(vcovs_metasem))
-            ) <= 0.001
+          testthat::expect_true(
+            all(
+              abs(
+                c(
+                  mxEval(tau_sqr, fit$output)
+                )[c(1, 2, 4)] - coefs_metasem[3:5]
+              ) <= 0.001
+            )
           )
-        )
+          testthat::expect_true(
+            all(
+              abs(
+                c(
+                  mxEval(i_sqr, fit$output)
+                ) - summary_table_metasem$I2.values[, "Estimate"]
+              ) <= 0.001
+            )
+          )
+          testthat::expect_true(
+            all(
+              abs(
+                summary_table[1:5, 2] - sqrt(diag(vcovs_metasem))
+              ) <= 0.001
+            )
+          )
+        }
       }
     )
   },

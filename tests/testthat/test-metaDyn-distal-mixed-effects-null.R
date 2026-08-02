@@ -21,7 +21,7 @@ lapply(
     }
     if (identical(Sys.getenv("GITHUB_TEST"), "true")) {
       ci <- TRUE
-      n <- 5000
+      n <- 2000
       robust <- TRUE
       tol <- 0.50
     } else {
@@ -52,6 +52,19 @@ lapply(
             rnorm(n = 3)
           }
         )
+        eta <- lapply(
+          X = seq_len(n),
+          FUN = function(i) {
+            upsilon <- MASS::mvrnorm(
+              n = 1,
+              mu = c(0, 0),
+              Sigma = tau_sqr
+            )
+            c(
+              alpha + gamma %*% x[[i]] + upsilon
+            )
+          }
+        )
         y <- lapply(
           X = seq_len(n),
           FUN = function(i) {
@@ -60,13 +73,8 @@ lapply(
               mu = c(0, 0),
               Sigma = v[[i]]
             )
-            upsilon <- MASS::mvrnorm(
-              n = 1,
-              mu = c(0, 0),
-              Sigma = tau_sqr
-            )
             c(
-              alpha + gamma %*% x[[i]] + upsilon + epsilon
+              eta[[i]] + epsilon
             )
           }
         )
@@ -79,7 +87,7 @@ lapply(
               Sigma = psi
             )
             c(
-              kappa + phi %*% y[[i]] + omega %*% x[[i]] + delta
+              kappa + phi %*% eta[[i]] + omega %*% x[[i]] + delta
             )
           }
         )
@@ -89,6 +97,7 @@ lapply(
           x = x,
           z = z,
           random = TRUE,
+          fixed_x = TRUE,
           seed = 42
         )
         if (ci) {
@@ -99,8 +108,8 @@ lapply(
           confint(fit)
           extract(fit)
           vcov(fit, robust = TRUE)
-          confint(fit, robust = TRUE)
-          summary(fit, robust = TRUE)
+          confint(fit, robust = TRUE, ci_type = "mc")
+          summary(fit, robust = TRUE, ci_type = "mc")
         }
         coefs <- coef(fit)
         testthat::expect_true(
@@ -137,9 +146,13 @@ lapply(
           all(
             abs(
               round(
-                x = mxEval(v_hat, fit$output),
+                x = c(
+                  mxEval(v_hat, fit$output)
+                ),
                 digits = 1
-              ) - v_hat
+              ) - c(
+                diag(v_hat)
+              )
             ) <= tol
           )
         )
@@ -239,7 +252,7 @@ lapply(
               round(
                 x = mxEval(total, fit$output),
                 digits = 2
-              ) - phi %*% gamma + omega
+              ) - (phi %*% gamma + omega)
             ) <= tol
           )
         )

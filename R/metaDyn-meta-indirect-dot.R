@@ -1,11 +1,10 @@
 .MetaIndirect <- function(ynames,
                           xnames,
-                          znames,
-                          alpha) {
+                          znames) {
   p <- length(ynames)
   m <- length(xnames)
   r <- length(znames)
-  # Direct effect
+  # Direct effect: x to z
   direct <- OpenMx::mxAlgebraFromString(
     algString = "omega",
     name = "direct",
@@ -43,11 +42,17 @@
     direct = direct,
     direct_vec = direct_vec
   )
-  # Indirect effect across all mediators
+  # Total indirect effect through all latent effect-size mediators:
+  # x_j to eta_1, ..., eta_p to z_i
+  # Element (i, j) is sum_k phi[i, k] * gamma[k, j].
+  # Assumes beta = 0, so indirect = phi %*% gamma.
   indirect <- OpenMx::mxAlgebraFromString(
     algString = "phi %*% gamma",
     name = "indirect",
-    dimnames = list(znames, xnames)
+    dimnames = list(
+      znames,
+      xnames
+    )
   )
   indirect_idx <- matrix(
     data = NA,
@@ -78,11 +83,14 @@
     indirect = indirect,
     indirect_vec = indirect_vec
   )
-  # Total effect across all mediators
+  # Total effect: direct + total indirect through all latent effect sizes.
   total <- OpenMx::mxAlgebraFromString(
     algString = "omega + indirect",
     name = "total",
-    dimnames = list(znames, xnames)
+    dimnames = list(
+      znames,
+      xnames
+    )
   )
   total_idx <- matrix(
     data = NA,
@@ -113,7 +121,9 @@
     total = total,
     total_vec = total_vec
   )
-  # Specific indirects: ie_<x>_<y>_<z> (1x1)
+  # Specific indirect effects:
+  # x_j to eta_k to z_i
+  # Element is phi[i, k] * gamma[k, j].
   grid_xyz <- expand.grid(
     z = seq_len(r),
     y = seq_len(p),

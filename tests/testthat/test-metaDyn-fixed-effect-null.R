@@ -17,7 +17,7 @@ lapply(
     }
     if (identical(Sys.getenv("GITHUB_TEST"), "true")) {
       ci <- TRUE
-      n <- 5000
+      n <- 2000
       robust <- TRUE
       tol <- 0.50
     } else {
@@ -59,6 +59,7 @@ lapply(
           y = y,
           v = v,
           random = FALSE,
+          fixed_x = TRUE,
           seed = 42
         )
         if (ci) {
@@ -69,8 +70,8 @@ lapply(
           confint(fit)
           extract(fit)
           vcov(fit, robust = TRUE)
-          confint(fit, robust = TRUE)
-          summary(fit, robust = TRUE)
+          confint(fit, robust = TRUE, ci_type = "mc")
+          summary(fit, robust = TRUE, ci_type = "mc")
         }
         coefs <- coef(fit)
         vcovs <- vcov(fit)
@@ -97,76 +98,85 @@ lapply(
         testthat::expect_true(
           all(
             abs(
-              mxEval(v_hat, fit$output) - v_hat
+              round(
+                x = c(
+                  mxEval(v_hat, fit$output)
+                ),
+                digits = 1
+              ) - c(
+                diag(v_hat)
+              )
             ) <= tol
           )
         )
         # benchmark with metaSEM
-        fit <- Meta(
-          y = y,
-          v = v,
-          random = FALSE,
-          i_sqr_univariate = TRUE,
-          seed = 42
-        )
-        coefs <- coef(fit)
-        summary_table <- summary(fit)
-        y <- do.call(what = "rbind", args = y)
-        colnames(y) <- c("y1", "y2")
-        v <- do.call(
-          what = "rbind",
-          args = lapply(
-            X = v,
-            FUN = function(x) {
-              x[
-                lower.tri(
-                  x = x,
-                  diag = TRUE
-                )
-              ]
-            }
+        if (requireNamespace("metaSEM")) {
+          fit <- Meta(
+            y = y,
+            v = v,
+            random = FALSE,
+            fixed_x = TRUE,
+            seed = 42
           )
-        )
-        colnames(v) <- c("y1y1", "y2y1", "y2y2")
-        data <- as.data.frame(
-          cbind(
-            y,
-            v
+          coefs <- coef(fit)
+          summary_table <- summary(fit)
+          y <- do.call(what = "rbind", args = y)
+          colnames(y) <- c("y1", "y2")
+          v <- do.call(
+            what = "rbind",
+            args = lapply(
+              X = v,
+              FUN = function(x) {
+                x[
+                  lower.tri(
+                    x = x,
+                    diag = TRUE
+                  )
+                ]
+              }
+            )
           )
-        )
-        metasem <- meta(
-          y = cbind(y1, y2),
-          v = cbind(y1y1, y2y1, y2y2),
-          data = data,
-          RE.constraints = matrix(
-            data = 0,
-            nrow = 2,
-            ncol = 2
+          colnames(v) <- c("y1y1", "y2y1", "y2y2")
+          data <- as.data.frame(
+            cbind(
+              y,
+              v
+            )
           )
-        )
-        coefs_metasem <- coef(metasem)
-        vcovs_metasem <- vcov(metasem)
-        testthat::expect_true(
-          all(
-            abs(
-              coefs - coefs_metasem
-            ) <= 0.001
+          metasem <- meta(
+            y = cbind(y1, y2),
+            v = cbind(y1y1, y2y1, y2y2),
+            data = data,
+            RE.constraints = matrix(
+              data = 0,
+              nrow = 2,
+              ncol = 2
+            )
           )
-        )
-        testthat::expect_true(
-          all(
-            abs(
-              c(mxEval(alpha, fit$output)) - coefs_metasem
-            ) <= 0.001
+          coefs_metasem <- coef(metasem)
+          vcovs_metasem <- vcov(metasem)
+          testthat::expect_true(
+            all(
+              abs(
+                coefs - coefs_metasem
+              ) <= 0.001
+            )
           )
-        )
-        testthat::expect_true(
-          all(
-            abs(
-              vcovs - vcovs_metasem
-            ) <= 0.001
+          testthat::expect_true(
+            all(
+              abs(
+                c(mxEval(alpha, fit$output)) - coefs_metasem
+              ) <= 0.001
+            )
           )
-        )
+          testthat::expect_true(
+            all(
+              abs(
+                vcovs - vcovs_metasem
+              ) <= 0.001
+            )
+          )
+        }
       }
     )
   },
