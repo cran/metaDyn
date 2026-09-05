@@ -1,7 +1,7 @@
-91a50836f408087f11f1e8b92e47d3a6 *DESCRIPTION
+7761bc6743f7fb2c5e820c00a9c77de4 *DESCRIPTION
 0f5c7a901fd4ff4b41ef9a2a15949000 *LICENSE
 69cd4dcebcc0bc888c7bebdffff8bd4d *NAMESPACE
-613396b5fc78a7d483f9a1f8db370ce2 *NEWS.md
+2e48b1f164745802b79d6a3d4ce1d27a *NEWS.md
 d209af142aabdaabdd88f2285c5af3eb *R/linearAlgebra-sym-of-vech-dot.R
 c976709531b3098ec03923b46524f9f2 *R/linearAlgebra-vech-dot.R
 260455b589d93ece6fd8e83722fb8413 *R/metaDyn-average-within-univariate-dot.R
@@ -18,7 +18,7 @@ fc6317a3abfd5813beb136ed1a361d8b *R/metaDyn-meta-check-free.R
 5078e7b208c6786d73df165974ccad62 *R/metaDyn-meta-expected-covariances-joint-x-z-dot.R
 533659054fab05b6805bad65835916f1 *R/metaDyn-meta-expected-means-dot.R
 3619b06ef7f90e0211505d73d45df555 *R/metaDyn-meta-extract-dot.R
-5d5ab5376f900657b1cf2c899ed7ff55 *R/metaDyn-meta-fit-dot.R
+fa2a1d83301178ac72d7fd9b0a6c7dc9 *R/metaDyn-meta-fit-dot.R
 7ca4bb9a9c5ca3872922858e5936a333 *R/metaDyn-meta-gamma-dot.R
 43c221f3c2685d9e1d92e9082ff46bb9 *R/metaDyn-meta-i-sqr-dot.R
 84b56f2c2861ebc298a3fb1860a68710 *R/metaDyn-meta-indirect-dot.R
@@ -42,12 +42,12 @@ f5f9ab2975ebe44b18285f8eb59143f3 *R/metaDyn-meta-tau-sqr-dot.R
 1f36d457d68be55b4c750a57f74fffc7 *R/metaDyn-meta-v-hat-univariate-dot.R
 864b7d8cafdd92104ccf388bd9f4f1c0 *R/metaDyn-meta-var-mx.R
 e079604703eb97d5070a8b7e076029cc *R/metaDyn-meta.R
-d9f0b1d54f59b2e6db84e8eddfbc7b27 *R/metaDyn-methods-metadynmeta.R
+1ce1540178179e56cfdc09343c14153f *R/metaDyn-methods-metadynmeta.R
 52dd0d46a3a2f1656fac8f81b999955b *R/metaDyn-package.R
 af7320a7067566cb4e3c5755b1157749 *R/metaDyn-prep-data.R
-aef353c980923cb974ed1fd4f6f5729c *R/mxHelper-at-bounds-dot.R
+b8c8ebe9925ef34bf96457d279a58541 *R/mxHelper-at-bounds-dot.R
 2412d8fb6bfa2a1e75d2eef58b20de53 *R/mxHelper-check-status-code-dot.R
-774357db73deaaca01ed9184d52f89f6 *R/mxHelper-ensure-good-hessian-dot.R
+94ca1c1b6be96be9d20b6cbb896c7763 *R/mxHelper-ensure-good-hessian-dot.R
 35187c81bbd3ecd6cc29fa8f518fb540 *R/mxHelper-force-hessian-options.R
 4394e5623a9e6c9f9c2750303f253559 *R/mxHelper-full-bound-dot.R
 805a3811a09f64e0f59efeadd658f8cd *R/mxHelper-full-free-dot.R
@@ -58,9 +58,9 @@ af34610a0bd02644ce4e1094760f05d4 *R/mxHelper-full-values-dot.R
 47e2e932652c9057378f1198e8aa8c41 *R/mxHelper-has-pd-hessian-dot.R
 9c34a42c7345a6cfdf5cf8cd5e065978 *R/mxHelper-is-good-fit-dot.R
 527c54018d539c3e180337fe66695df0 *R/mxHelper-ldl-dot.R
-375e69849e86b076d5636a1837c5f589 *R/mxHelper-needs-rescue.R
-78df284a6733dae216da6facd75f1f12 *R/mxHelper-nudge-off-bounds-dot.R
-8a71de5ebe219db187a0ee10e86c8479 *R/mxHelper-relax-bounds-at-bounds-dot.R
+ef13a2726d38649ca814b0ab4c208a16 *R/mxHelper-needs-rescue.R
+6d7c0a76a422b022a9238015ade1dfe1 *R/mxHelper-nudge-off-bounds-dot.R
+ad12008aea0276f4637536ed7890813e *R/mxHelper-relax-bounds-at-bounds-dot.R
 834d4b32790fa9ed6b108aaa1b96c201 *R/mxHelper-run-dot.R
 d04869caeabb80f480249613cf9e9556 *R/mxHelper-sdiag-bound-dot.R
 b9d92b52c1fa6f9b5db71faa53fe7e84 *R/mxHelper-sdiag-free-dot.R
